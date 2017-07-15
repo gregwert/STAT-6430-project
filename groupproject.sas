@@ -1,4 +1,4 @@
-
+/*read in Master.csv*/
 filename mastrcsv "%sysfunc(getoption(work))/streaming.sas7bdat";
  
 proc http method="get" 
@@ -8,13 +8,13 @@ proc http method="get"
 run;
 
 data master;
-infile mastrcsv dsd;
+infile mastrcsv dsd firstobs=2;
 retain consultant projnum date hours stage complete;
-length projnum $3 date $10 stage $1 complete $1;
+length consultant $5 date $10;
 input consultant $ projnum date $ hours stage complete;
 run;
-*first row is displaying as column headers from file;
 
+/*read in NewForms.csv*/
 filename nwfrmcsv "%sysfunc(getoption(work))/streaming.sas7bdat";
  
 proc http method="get" 
@@ -24,13 +24,14 @@ proc http method="get"
 run;
 
 data newForms;
-infile nwfrmcsv dsd;
-retain consultant projnum date hours stage complete;
-length projnum $3 date $10 stage $1 complete $1;
-input consultant $ projnum date $ hours stage complete;
+infile nwfrmcsv dsd firstobs=2;
+retain projnum date hours stage complete;
+length date $10;
+input projnum date $ hours stage complete;
 run;
-*similar top row column issue that needs to be addressed;
 
+
+/*read in ProjClass.csv*/
 filename prjclcsv "%sysfunc(getoption(work))/streaming.sas7bdat";
  
 proc http method="get" 
@@ -40,12 +41,13 @@ proc http method="get"
 run;
 
 data projClass;
-infile prjclcsv dsd;
+infile prjclcsv dsd firstobs=2;
 retain type projNum;
-length projNum $3;
+length type $ 18;
 input type $ projNum;
 run;
 
+/*read in Assignments.csv*/
 filename asmntcsv "%sysfunc(getoption(work))/streaming.sas7bdat";
  
 proc http method="get" 
@@ -55,12 +57,12 @@ proc http method="get"
 run;
 
 data assignments;
-infile asmntcsv dsd;
-retain consultant projNum;
-length projNum $3;
+infile asmntcsv dsd firstobs=2;
+length consultant $5;
 input consultant $ projNum;
 run;
 
+/*read in Corrections.csv*/
 filename crrctcsv "%sysfunc(getoption(work))/streaming.sas7bdat";
  
 proc http method="get" 
@@ -69,10 +71,36 @@ proc http method="get"
 ;
 run;
 data corrections;
-infile crrctcsv dsd;
+infile crrctcsv dsd firstobs=2;
 retain projNum date hours stage;
-length projNum $3 date $10 hours stage $1;
+length date $ 10;
 input projNum date $ hours stage;
 run;
 
+/*stack Master and NewForms, output to Master2*/
 
+data Master2;
+set Master NewForms;
+run;
+
+/*merge Master2 with Corrections.
+corrected hours are under newhours, corrected stage is under newstage.*/
+
+data Master3;
+retain consultant projnum date hours newhours stage newstage complete;
+merge Master2 Corrections (rename=(hours=newhours stage=newstage));
+run;
+
+/*create Master4:
+replace hours with newhours if newhours is not missing
+replace stage with newstage if newstage is not missing*/
+
+data Master4;
+set Master3;
+retain consultant projnum date hours2 stage2 complete; /*this order doesn't seem to work!!*/
+if missing(newhours) then hours2=hours;
+else hours2=newhours;
+if missing(newstage) then stage2=stage;
+else stage2=newstage;
+drop hours newhours stage newstage;
+run;
