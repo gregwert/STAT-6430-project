@@ -86,18 +86,83 @@ run;
 /*merge Master2 with Corrections.
 corrected hours are under newhours, corrected stage is under newstage.*/
 
-data Master3;
-retain consultant projnum date hours newhours stage newstage complete;
-merge Master2 Corrections (rename=(hours=newhours stage=newstage));
+/*using indicator variable to include observations from Master3 only*/
+
+proc sort data = Master2 out = Master2sort;
+by projnum date;
 run;
 
-/*create Master4:
+proc sort data = corrections out = correctionssort;
+by projnum date;
+run;
+
+data Master3;
+retain consultant projnum date hours newhours stage newstage complete;
+merge Master2sort(in = in1) correctionssort (rename=(hours=newhours stage=newstage));
+if in1 then output;
+run;
+
+/* Merge Master3 with projclass to include add project classification */
+
+/* First sort data in Master3 and projclass by projnum */
+
+proc sort data = Master3 out = Master3sort;
+by projnum;
+run;
+
+proc sort data = projclass out = projclasssort;
+by projnum;
+run;
+
+
+/* Merge sorted data Master3sort with projclass */
+data Master4;
+merge Master3sort(in = in1) projclasssort;
+by projnum;
+if in1 then output;
+run;
+
+
+/* Merge Master4 with Assignments to fill blanks in Consultant column after Sep 1 */
+
+/* Sort assignments data by projnum */
+
+proc sort data = assignments out = assignmentssort;
+by projnum;
+run;
+
+/* Merge Master 4 with assignmentssorted */
+
+data Master5;
+merge Master4(in = in1) assignmentssort(rename = (consultant = consultant_new));
+by projnum;
+if in1 then output;
+run;
+
+data Master6;
+set Master5;
+if missing(consultant) then consultant_final = consultant_new;
+else consultant_final = consultant;
+run;
+
+/* Fill up missing values wihin consultant_final */
+
+data Master7;
+set Master6;
+by projnum;
+retain consult_msg;
+if first.projnum then consult_msg = consultant_final;
+if missing(consultant_final) then consultant_final = consult_msg;
+drop consultant consultant_new consult_msg;
+run;
+
+/*create Master5:
 replace hours with newhours if newhours is not missing
 replace stage with newstage if newstage is not missing*/
 
-data Master4;
-set Master3;
-retain consultant projnum date hours2 stage2 complete; /*this order doesn't seem to work!!*/
+data Master8;
+set Master7;
+retain consultant_final projnum date hours2 stage2 complete type; /*this order doesn't seem to work!!*/
 if missing(newhours) then hours2=hours;
 else hours2=newhours;
 if missing(newstage) then stage2=stage;
