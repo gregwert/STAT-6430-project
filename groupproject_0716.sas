@@ -1,19 +1,26 @@
-﻿/* Steps to create NewMaster file 
+﻿/*  SAS 6410 group project
 
-1. Read the input datefiles - 
+OBJECTIVE 1 -
+
+1. Read the input datafiles - 
 	a. Master.csv
 	b. NewForms.csv
 	c. Projclass.csv
 	d. Assignments.csv
 	e. Corrections.csv
-2. Stack NewForms to Master to create Master2
-3. Merge corrections with Master2 on variables projnum and date to create Master3- 
-	a. Clean corrections file to remove duplicates at projnum-date level
-4. Merge Projclass with Master3 to add project category against each project
-5. Merge Assignments with Master4 to get consultant names for projects entered after Sep 1
-6. Fill missing values remaining in the Master6 file 
-7. Update corrected hours and corrected stage, create new field Correction_hours and Correction_stage wherever update is made
 
+2. Stack, merge and clean - 
+	a. Stack NewForms to Master to create Master2
+	b. Merge corrections with Master2 on variables projnum and date to create Master3- 
+	c. Clean corrections file to remove duplicates at projnum-date level
+	d. Merge Projclass with Master3 to add project category against each project
+	e. Merge Assignments with Master4 to get consultant names for projects entered after Sep 1
+	f. Fill missing values remaining in the Master6 file 
+	g. Update corrected hours and corrected stage, create new field Correction_hours and Correction_stage wherever update is made
+
+3. Export to .csv and permanent SAS dataset (.sas7bdat)
+
+*/
 
 /*read in Master.csv*/
 filename mastrcsv "%sysfunc(getoption(work))/streaming.sas7bdat";
@@ -202,3 +209,22 @@ Correction_stage = "Yes";
 end;
 drop hours newhours stage newstage;
 run;
+
+/* Output Master8 to NewMaster.csv */
+
+filename outcsv "C:\Users\Rohan Bapat\Documents\Classes\STAT 6430\SAS Project\STAT-6430-project-master\NewMaster.csv";
+
+data _Null_;
+set Master8;
+file outcsv dsd;
+put (_ALL_)(~);
+run;
+
+/* Output to permanent SAS dataset*/
+
+LIBNAME outsasdf "C:\Users\Rohan Bapat\Documents\Classes\STAT 6430\SAS Project\STAT-6430-project-master";
+
+data outsasdf.NewMaster;
+set Master8;
+run;
+
