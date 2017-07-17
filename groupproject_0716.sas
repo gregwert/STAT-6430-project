@@ -1,4 +1,4 @@
-﻿/*  SAS 6410 group project
+/*  SAS 6410 group project
 
 OBJECTIVE 1 -
 
@@ -34,7 +34,9 @@ run;
 data master;
 infile mastrcsv dsd firstobs=2;
 retain consultant projnum date hours stage complete;
-length consultant $5 date $10;
+length consultant $5;
+informat date mmddyy10.;
+format date mmddyy10.;
 input consultant $ projnum date hours stage complete;
 run;
 
@@ -50,7 +52,8 @@ run;
 data newForms;
 infile nwfrmcsv dsd firstobs=2;
 retain projnum date hours stage complete;
-length date $10;
+informat date mmddyy10.;
+format date mmddyy10.;
 input projnum date $ hours stage complete;
 run;
 
@@ -97,7 +100,8 @@ run;
 data corrections;
 infile crrctcsv dsd firstobs=2;
 retain projNum date hours stage;
-length date $10;
+informat date mmddyy10.;
+format date mmddyy10.;
 input projNum date $ hours stage;
 run;
 
