@@ -138,7 +138,7 @@ set Smith;
 by projnum date;
 if first.projnum then start_date = date;
 	else start_date = .;
-if last.projnum and stage2>3 then end_date = date;
+if last.projnum and complete=1 then end_date = date;
 	else end_date = .;
 format start_date mmddyy10. end_date mmddyy10.;
 if start_date ^= . or end_date ^=. then output;
