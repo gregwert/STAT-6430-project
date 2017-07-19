@@ -42,4 +42,5 @@ run;
 
 *print out contents of dataset;
 proc print data=ogProjects;
+title2 'Ongoing Projects';
 run;
