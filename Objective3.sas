@@ -1,18 +1,14 @@
 /*OBJECTIVE 3 --
-
 1. Separate observations by consultant and create individual datasets Brown, Jones and Smith
-
 2. Find start date and end date of each project
 	a. Sort datasets by project number and date
 	b. Use first.projnum and last.projnum to find the start and end date of each project, where applicable
 	c. Output information on start dates and end dates to Brown2, Jones2, Smith2
 	d. Update Brown2, Jones2 and Smith2 so start_date and end_date values appear in one observation per project.
 	e. Output updated observations to Brownstartend, Jonesstartend, Smithstartend.
-
 3. Calculate project hours
 	a. Create a variable named projhours, summing the total number of works per project.
 	b. Output only the observations with a final project hour total to datasets Brown3, Jones3, Smith 3.
-
 4. Create final datasets with complete information on project hours and start and end dates
 	a. Sort Brown3, Jones3, Smith3, Brownstartend, Jonesstartend, Smithstartend by project number.
 	b. Merge each pair of datasets to create Brown_final, Jones_final, Smith_final.
@@ -20,7 +16,7 @@
 
 /*output separate data sets for Brown, Jones and Smith*/
 data Brown Jones Smith;
-set '/home/sg2zv0/hw2/newmaster.sas7bdat';
+set '/home/sg2zv0/finalproj/newmaster.sas7bdat';
 if consultant_final="Brown" then output Brown;
 if consultant_final="Jones" then output Jones;
 if consultant_final="Smith" then output Smith;
@@ -176,4 +172,18 @@ retain projnum type projhours complete start_date end_date;
 merge Smith3 Smithstartend;
 by projnum;
 label projnum = "Project Number" type="Type" projhours="Total Hours" complete="Complete" start_date="Start Date" end_date="End Date";
+run;
+
+/*proc print table*/
+title "Brown's Projects";
+
+proc print data=Brown_final noobs label;
+run;
+
+title "Jones's Projects";
+proc print data=Jones_final noobs label;
+run;
+
+title "Smith's Projects";
+proc print data=Smith_final noobs label;
 run;
