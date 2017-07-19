@@ -29,4 +29,54 @@ proc transpose data=wkday_hours out=wkday_final(drop=_name_);
 	by wkday;
 run;
 
-title 'Hours Worked by Each Consultant on Each Day of the Week';
+
+/*proc print table*/
+title 'Hours Worked on Each Day of the Week';
+title2 'by Consultant';
+
+proc format;
+value weekform
+	2 = "Monday"
+	3 = "Tuesday"
+	4 = "Wednesday"
+	5 = "Thursday"
+	6 = "Friday";
+run;
+
+proc print data=wkday_final noobs label;
+format wkday weekform.;
+label wkday = "Weekday";
+run;
+
+
+title2 'Aggregated by Weekday';
+proc gchart data=wkday_hours;
+format wkday weekform.;
+vbar wkday / sumvar=total_hours;
+run;
+
+
+/*grouped vertical bar chart*/
+
+/* Set the graphics environment */
+goptions border htitle=10pt htext=8pt;
+
+/* Define the title */
+title2 "By Consultant";
+
+/* Define the axis characteristics */
+axis1 value=none label=none;
+axis2 label=(angle=90 "Hours");
+axis3 label=none;
+
+/* Define the legend options */
+legend1 frame;
+
+/* Generate the graph */
+proc gchart data=wkday_hours;
+format wkday weekform.;
+   vbar consultant_final / subgroup=consultant_final group=wkday sumvar=total_hours
+                  legend=legend1 space=0 gspace=4
+                  maxis=axis1 raxis=axis2 gaxis=axis3;
+run;
+quit;
