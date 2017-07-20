@@ -555,8 +555,9 @@ value stages
 run;
 
 proc gchart data=bars;
-   format stage2 stages.;
-   hbar type / noframe type=pct subgroup=stage2
+	title2 'Time spent on stages per type'; 
+   	format stage2 stages.;
+   	hbar type / noframe type=pct subgroup=stage2
                g100 group=type
                nozero gaxis=axis1 
 			   nostat
